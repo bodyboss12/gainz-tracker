@@ -1,9 +1,9 @@
-date,exercise,sets,reps,weight_kg,notes
-2024-03-01,Squat,3,5,102.5,
-2024-03-01,Bench Press,4,6,77.5,slight shoulder ache
-2024-03-01,Barbell Row,3,8,70.0,
-2024-03-03,Deadlift,1,5,145.0,new PR
-2024-03-03,Overhead Press,3,5,52.5,
-2024-03-05,Squat,3,5,105.0,
-2024-03-05,Bench Press,4,6,80.0,
-2024-03-05,Barbell Row,3,8,72.5,
+date,exercise,sets,reps,weight_kg
+2024-01-01,Squat,3,5,100.0
+2024-01-01,Bench Press,3,8,80.0
+2024-01-08,Squat,3,5,105.0
+2024-01-08,Deadlift,1,5,140.0
+2024-01-15,Squat,3,5,107.5
+2024-01-15,Bench Press,4,6,82.5
+2024-01-22,Deadlift,3,3,150.0
+2024-01-22,OHP,3,8,55.0
