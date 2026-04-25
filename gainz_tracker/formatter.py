@@ -1,58 +1,62 @@
-"""Format stats and records for CLI output."""
-
-from typing import Dict
-
+from typing import List, Dict
 from gainz_tracker.stats import ExerciseStats
-from gainz_tracker.csv_loader import WorkoutEntry
-
-
-COL_WIDTH = 14
-HEADER = (
-    f"{'Exercise':<20} {'Sessions':>{COL_WIDTH}} {'Sets':>{COL_WIDTH}} "
-    f"{'Total Reps':>{COL_WIDTH}} {'Max (kg)':>{COL_WIDTH}} {'Avg (kg)':>{COL_WIDTH}}"
-)
-SEPARATOR = "-" * len(HEADER)
+from gainz_tracker.scheduler import WorkoutSchedule
 
 
 def format_stats_table(stats: Dict[str, ExerciseStats]) -> str:
-    """Render a plain-text table of exercise statistics."""
+    """Render a summary table of all exercise stats."""
     if not stats:
-        return "No data to display."
+        return "No stats available."
 
-    lines = [HEADER, SEPARATOR]
+    header = f"{'Exercise':<20} {'Sessions':>8} {'Max Weight':>12} {'Avg Reps':>10}"
+    sep = "-" * len(header)
+    rows = [header, sep]
+
     for exercise, s in sorted(stats.items()):
-        lines.append(
-            f"{exercise:<20} {s.sessions:>{COL_WIDTH}} {s.total_sets:>{COL_WIDTH}} "
-            f"{s.total_reps:>{COL_WIDTH}} {s.max_weight:>{COL_WIDTH}.1f} "
-            f"{s.avg_weight:>{COL_WIDTH}.1f}"
+        rows.append(
+            f"{exercise:<20} {s.total_sessions:>8} {s.max_weight:>12.1f} {s.avg_reps:>10.1f}"
         )
-    return "\n".join(lines)
+
+    return "\n".join(rows)
 
 
-def format_personal_records(prs: Dict[str, WorkoutEntry]) -> str:
-    """Render a plain-text list of personal records."""
+def format_personal_records(prs: Dict[str, float]) -> str:
+    """Render personal records as a formatted list."""
     if not prs:
         return "No personal records found."
 
-    lines = ["Personal Records", SEPARATOR]
-    for exercise, entry in sorted(prs.items()):
-        lines.append(
-            f"  {exercise:<20}  {entry.weight:>7.1f} kg  "
-            f"({entry.reps} reps on {entry.date})"
-        )
+    lines = ["Personal Records:", "-" * 30]
+    for exercise, weight in sorted(prs.items()):
+        lines.append(f"  {exercise:<20} {weight:.1f} kg")
     return "\n".join(lines)
 
 
-def format_single_exercise(
-    exercise: str, stats: ExerciseStats, pr: WorkoutEntry
-) -> str:
-    """Render a brief summary for a single exercise."""
-    return (
-        f"Exercise : {exercise}\n"
-        f"Sessions : {stats.sessions}\n"
-        f"Total sets: {stats.total_sets}\n"
-        f"Total reps: {stats.total_reps}\n"
-        f"Max weight: {stats.max_weight:.1f} kg  (PR on {pr.date}, {pr.reps} reps)\n"
-        f"Avg weight: {stats.avg_weight:.1f} kg\n"
-        f"Min weight: {stats.min_weight:.1f} kg"
-    )
+def format_single_exercise(exercise: str, stats: ExerciseStats) -> str:
+    """Render detailed stats for one exercise."""
+    lines = [
+        f"Exercise : {exercise}",
+        f"Sessions : {stats.total_sessions}",
+        f"Max Weight: {stats.max_weight:.1f} kg",
+        f"Avg Reps : {stats.avg_reps:.1f}",
+        f"Total Vol : {stats.total_volume:.1f} kg",
+    ]
+    return "\n".join(lines)
+
+
+def format_schedule(schedules: List[WorkoutSchedule], as_of=None) -> str:
+    """Render the recommended workout schedule as a table."""
+    if not schedules:
+        return "No schedule data available."
+
+    header = f"{'Exercise':<20} {'Next Session':<14} {'Days Since':>10} {'Overdue By':>12}"
+    sep = "-" * len(header)
+    rows = [header, sep]
+
+    for s in schedules:
+        overdue_str = f"{s.overdue_by}d" if s.overdue_by > 0 else "-"
+        rows.append(
+            f"{s.exercise:<20} {str(s.recommended_date):<14} "
+            f"{s.days_since_last:>10} {overdue_str:>12}"
+        )
+
+    return "\n".join(rows)
