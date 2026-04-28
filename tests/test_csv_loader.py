@@ -21,6 +21,9 @@ BAD_ROW_CSV = """date,exercise,sets,reps,weight_kg
 2024-01-15,Squat,three,5,100.0
 """
 
+EMPTY_CSV = """date,exercise,sets,reps,weight_kg,notes
+"""
+
 
 @pytest.fixture
 def sample_csv_file(tmp_path: Path) -> Path:
@@ -40,6 +43,13 @@ def missing_cols_file(tmp_path: Path) -> Path:
 def bad_row_file(tmp_path: Path) -> Path:
     f = tmp_path / "bad_row.csv"
     f.write_text(BAD_ROW_CSV)
+    return f
+
+
+@pytest.fixture
+def empty_csv_file(tmp_path: Path) -> Path:
+    f = tmp_path / "empty.csv"
+    f.write_text(EMPTY_CSV)
     return f
 
 
@@ -85,3 +95,9 @@ def test_load_csv_missing_required_columns(missing_cols_file):
 def test_load_csv_bad_row_raises(bad_row_file):
     with pytest.raises(ValueError, match="Error parsing row"):
         load_csv(bad_row_file)
+
+
+def test_load_csv_empty_file_returns_empty_list(empty_csv_file):
+    """A CSV with only a header row should return an empty list, not raise."""
+    entries = load_csv(empty_csv_file)
+    assert entries == []
