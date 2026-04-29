@@ -24,9 +24,14 @@ def _group_by_date(entries: List[WorkoutEntry]) -> dict[str, float]:
     return dict(sorted(by_date.items()))
 
 
+def _filter_exercise(entries: List[WorkoutEntry], exercise: str) -> List[WorkoutEntry]:
+    """Return entries matching the given exercise name (case-insensitive)."""
+    return [e for e in entries if e.exercise.lower() == exercise.lower()]
+
+
 def ascii_progress(entries: List[WorkoutEntry], exercise: str) -> str:
     """Return a simple ASCII sparkline of max weight over time."""
-    relevant = [e for e in entries if e.exercise.lower() == exercise.lower()]
+    relevant = _filter_exercise(entries, exercise)
     if not relevant:
         return f"No data found for '{exercise}'."
 
@@ -40,7 +45,7 @@ def ascii_progress(entries: List[WorkoutEntry], exercise: str) -> str:
     width = len(weights)
 
     lines = []
-    lines.append(f"Progress: {exercise}  ({dates[0]} → {dates[-1]})")
+    lines.append(f"Progress: {exercise}  ({dates[0]} \u2192 {dates[-1]})")
     lines.append(f"Max: {max_w:.1f} kg" + " " * 4 + f"Min: {min_w:.1f} kg")
     lines.append("")
 
@@ -49,7 +54,7 @@ def ascii_progress(entries: List[WorkoutEntry], exercise: str) -> str:
     for row in range(height, 0, -1):
         threshold = min_w + span * (row - 1) / height
         label = f"{threshold:6.1f} |"
-        bar = "".join("█" if w >= threshold else " " for w in weights)
+        bar = "".join("\u2588" if w >= threshold else " " for w in weights)
         rows.append(label + bar)
     rows.append(" " * 8 + "-" * width)
     rows.append(" " * 8 + dates[0] + " " * (width - len(dates[0]) - len(dates[-1])) + dates[-1])
@@ -63,7 +68,7 @@ def plot_progress(entries: List[WorkoutEntry], exercise: str, save_path: str | N
         print(ascii_progress(entries, exercise))
         return
 
-    relevant = [e for e in entries if e.exercise.lower() == exercise.lower()]
+    relevant = _filter_exercise(entries, exercise)
     if not relevant:
         print(f"No data found for '{exercise}'.")
         return
@@ -74,7 +79,7 @@ def plot_progress(entries: List[WorkoutEntry], exercise: str, save_path: str | N
 
     fig, ax = plt.subplots(figsize=(10, 4))
     ax.plot(dates, weights, marker="o", linewidth=2, color="steelblue")
-    ax.set_title(f"{exercise} — weight over time")
+    ax.set_title(f"{exercise} \u2014 weight over time")
     ax.set_xlabel("Date")
     ax.set_ylabel("Max weight (kg)")
     ax.tick_params(axis="x", rotation=45)
